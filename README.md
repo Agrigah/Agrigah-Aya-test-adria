@@ -73,7 +73,7 @@ docker compose ps             # tout doit être "healthy"
 ```bash
 mvn clean install -DskipTests
 docker compose up -d kafka                       # Kafka seul (localhost:29092)
-export OPENAI_API_KEY=...                        # Windows PowerShell : $env:OPENAI_API_KEY="..."
+export OPENAI_API_KEY=...                        # + OPENAI_BASE_URL, OPENAI_COMPLETIONS_PATH, OPENAI_MODEL (voir « LLM ») ; PowerShell : $env:OPENAI_API_KEY="..."
 # un terminal par service, DANS CET ORDRE :
 mvn -pl discovery-service spring-boot:run
 mvn -pl config-service spring-boot:run
@@ -87,10 +87,21 @@ Angular : `cd bank-ui && npm install && npm start` → http://localhost:4200
 Fraude : `cd fraud-detection && pip install -r requirements.txt` → placer `bank_transactions.csv` → `jupyter notebook fraud_detection.ipynb`
 
 ## LLM (partie E)
-Tout fournisseur compatible OpenAI (function calling requis) :
-- OpenAI : `OPENAI_API_KEY=sk-...` (modèle `gpt-4o-mini`)
-- Groq (gratuit) : `OPENAI_BASE_URL=https://api.groq.com/openai`, `OPENAI_MODEL=llama-3.3-70b-versatile`
-- Ollama (local) : `OPENAI_BASE_URL=http://localhost:11434`, `OPENAI_MODEL=llama3.1`, clé quelconque
+L'agent utilise l'API compatible OpenAI . Configuration testée et fonctionnelle avec **Google Gemini** :
+
+```env
+OPENAI_API_KEY=<votre-clé-API-Gemini>
+OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+OPENAI_COMPLETIONS_PATH=/chat/completions
+OPENAI_MODEL=gemini-2.5-flash
+```
+
+- Copier `.env.example` en `.env`, y mettre sa propre clé (le fichier `.env` est ignoré par git : **ne jamais committer une clé**).
+- En local (PowerShell) : `$env:OPENAI_API_KEY="..."; $env:OPENAI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai"; $env:OPENAI_COMPLETIONS_PATH="/chat/completions"; $env:OPENAI_MODEL="gemini-2.5-flash"`
+- Autres fournisseurs possibles :
+  - OpenAI : `OPENAI_BASE_URL=https://api.openai.com`, `OPENAI_COMPLETIONS_PATH=/v1/chat/completions`, `OPENAI_MODEL=gpt-4o-mini`
+  - Groq : `OPENAI_BASE_URL=https://api.groq.com/openai`, `OPENAI_COMPLETIONS_PATH=/v1/chat/completions`, `OPENAI_MODEL=llama-3.3-70b-versatile`
+  - Ollama (local) : `OPENAI_BASE_URL=http://localhost:11434`, `OPENAI_COMPLETIONS_PATH=/v1/chat/completions`, `OPENAI_MODEL=llama3.1`
 
 ## Scénarios de test (via la gateway)
 ```bash
