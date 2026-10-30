@@ -1,0 +1,42 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: chatbot-agent
+  config:
+    import: optional:configserver:${CONFIG_URL:http://localhost:8888}
+  ai:
+    openai:
+      # Tout fournisseur compatible OpenAI fonctionne (OpenAI, Groq, Ollama...) via OPENAI_BASE_URL
+      api-key: ${OPENAI_API_KEY:AQ.Ab8RN6JHNlyryJ90g4oGfQ6du2xo_SvXSWaSjM2KOU_sIO31kw}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+          temperature: 0.2
+    mcp:
+      client:
+        enabled: true
+        name: bank-chatbot
+        version: 1.0.0
+        type: SYNC
+        request-timeout: 30s
+        toolcallback:
+          enabled: true
+        sse:
+          connections:
+            account-service:
+              url: ${ACCOUNT_MCP_URL:http://localhost:8081}
+            transaction-service:
+              url: ${TRANSACTION_MCP_URL:http://localhost:8082}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:false}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
