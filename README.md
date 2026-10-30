@@ -133,6 +133,3 @@ Dockerfile, docker-compose.yml, .github/workflows/ci-cd.yml
 
 ## Limites connues
 - Keycloak (cité dans l'architecture cible) non implémenté.
-- Le notebook de fraude a été exécuté sur un jeu synthétique ; relancer avec `bank_transactions.csv` pour les résultats officiels.
-- Le chatbot nécessite une clé LLM valide (voir section « LLM »).
-- H2 en mémoire pour la simplicité ; PostgreSQL recommandé en production.
