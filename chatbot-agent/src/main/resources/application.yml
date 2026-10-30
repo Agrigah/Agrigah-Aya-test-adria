@@ -7,10 +7,10 @@ spring:
     import: optional:configserver:${CONFIG_URL:http://localhost:8888}
   ai:
     openai:
-      # Tout fournisseur compatible OpenAI fonctionne (OpenAI, Groq, Ollama...) via OPENAI_BASE_URL
-      api-key: ${OPENAI_API_KEY:AQ.Ab8RN6JHNlyryJ90g4oGfQ6du2xo_SvXSWaSjM2KOU_sIO31kw}
+      api-key: ${OPENAI_API_KEY:missing-key}
       base-url: ${OPENAI_BASE_URL:https://api.openai.com}
       chat:
+        completions-path: ${OPENAI_COMPLETIONS_PATH:/v1/chat/completions}
         options:
           model: ${OPENAI_MODEL:gpt-4o-mini}
           temperature: 0.2
