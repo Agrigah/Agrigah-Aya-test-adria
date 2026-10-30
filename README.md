@@ -28,6 +28,41 @@ Prérequis : JDK 21, Maven 3.9+, Docker, Node 20+ (Angular), Python 3.10+.
 ### Schéma d'architecture
 ![Schéma d'architecture](docs/img/schema_architecture.png)
 
+## Interface Angular et captures (Partie G)
+
+Client web `bank-ui` (http://localhost:4200) : onglets **Comptes**, **Transaction**, **Virement** et **Assistant IA**.
+
+### Comptes bancaires
+Liste des comptes (référence, devise, solde, statut), blocage / activation, création d'un compte, historique des transactions.
+
+![Comptes bancaires](docs/screenshots/ui_comptes.png)
+
+### Enregistrer une transaction
+Règles appliquées : montant > 0 et ≤ plafond (config-service), compte actif, même devise, solde suffisant.
+
+![Transaction](docs/screenshots/ui_transaction.png)
+
+### Réponse REST des transactions
+`GET /api/transactions` : `id`, `accountId`, `amount`, `currency`, `merchantCategory`, `country`, `type`, `createdAt`.
+
+![Réponse JSON REST](docs/screenshots/rest_transactions_json.png)
+
+### Virement entre comptes
+![Virement](docs/screenshots/ui_virement.png)
+
+### Historique après virement
+Un virement crée deux écritures `TRANSFER` : `DEBIT` sur le compte source, `CREDIT` sur le compte destination.
+
+![Historique des transactions et virements](docs/screenshots/ui_historique_virements.png)
+
+### Assistant IA (Spring AI + MCP)
+![Assistant IA](docs/screenshots/ui_assistant_ia.png)
+
+### Kafka avec Docker
+![docker compose ps — Kafka healthy](docs/screenshots/docker_compose_ps.png)
+
+![Docker Desktop](docs/screenshots/docker_desktop.png)
+
 ## Option 1 — Tout avec Docker (le plus simple)
 ```bash
 cp .env.example .env          # y mettre la clé du LLM
