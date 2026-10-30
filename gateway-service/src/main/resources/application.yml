@@ -1,0 +1,40 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway-service
+  config:
+    import: optional:configserver:${CONFIG_URL:http://localhost:8888}
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: account-service
+          uri: lb://ACCOUNT-SERVICE
+          predicates:
+            - Path=/api/accounts/**, /account-graphql/**
+        - id: transaction-service
+          uri: lb://TRANSACTION-SERVICE
+          predicates:
+            - Path=/api/transactions/**, /api/transfers/**, /transaction-graphql/**
+        - id: chatbot-agent
+          uri: lb://CHATBOT-AGENT
+          predicates:
+            - Path=/api/chat/**
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
