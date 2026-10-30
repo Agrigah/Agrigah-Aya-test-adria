@@ -1,0 +1,7 @@
+**/target
+.git
+.idea
+bank-ui/node_modules
+bank-ui/dist
+fraud-detection
+docs

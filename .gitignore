@@ -1,0 +1,10 @@
+target/
+.idea/
+*.iml
+.vscode/
+.env
+*.log
+node_modules/
+bank-ui/dist/
+bank-ui/.angular/
+fraud-detection/bank_transactions.csv
