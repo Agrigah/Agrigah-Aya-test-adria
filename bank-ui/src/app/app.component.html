@@ -1,0 +1,99 @@
+<header>
+  <h1>🏦 Bank Platform</h1>
+  <nav>
+    <button [class.active]="tab==='accounts'" (click)="tab='accounts'">Comptes</button>
+    <button [class.active]="tab==='transaction'" (click)="tab='transaction'">Transaction</button>
+    <button [class.active]="tab==='transfer'" (click)="tab='transfer'">Virement</button>
+    <button [class.active]="tab==='chat'" (click)="tab='chat'">Assistant IA</button>
+  </nav>
+</header>
+
+<main>
+  <div class="banner ok" *ngIf="message">{{ message }}</div>
+  <div class="banner err" *ngIf="error">{{ error }}</div>
+
+  <section *ngIf="tab==='accounts'">
+    <h2>Comptes bancaires</h2>
+    <table>
+      <tr><th>Référence</th><th>Devise</th><th>Solde</th><th>Statut</th><th>Id</th><th></th></tr>
+      <tr *ngFor="let a of accounts">
+        <td>{{ a.customerReference }}</td>
+        <td>{{ a.currency }}</td>
+        <td>{{ a.balance | number:'1.2-2' }}</td>
+        <td><span class="badge" [class.blocked]="a.status==='BLOCKED'">{{ a.status }}</span></td>
+        <td class="mono">{{ a.id }}</td>
+        <td><button (click)="toggleStatus(a)">{{ a.status==='ACTIVE' ? 'Bloquer' : 'Activer' }}</button></td>
+      </tr>
+    </table>
+
+    <h3>Nouveau compte</h3>
+    <div class="row">
+      <input placeholder="Référence client" [(ngModel)]="newAccount.customerReference">
+      <input placeholder="Devise" maxlength="3" [(ngModel)]="newAccount.currency">
+      <input type="number" placeholder="Solde initial" [(ngModel)]="newAccount.initialBalance">
+      <button (click)="createAccount()">Créer</button>
+    </div>
+
+    <h3>Historique des transactions</h3>
+    <div class="row">
+      <select [(ngModel)]="selectedAccountId" (change)="loadTransactions()">
+        <option value="">Tous les comptes</option>
+        <option *ngFor="let a of accounts" [value]="a.id">{{ a.customerReference }} ({{ a.currency }})</option>
+      </select>
+    </div>
+    <table>
+      <tr><th>Date</th><th>Type</th><th>Montant</th><th>Catégorie</th><th>Pays</th><th>Compte</th></tr>
+      <tr *ngFor="let t of transactions">
+        <td>{{ t.createdAt | date:'short' }}</td><td>{{ t.type }}</td>
+        <td>{{ t.amount | number:'1.2-2' }} {{ t.currency }}</td>
+        <td>{{ t.merchantCategory }}</td><td>{{ t.country }}</td><td class="mono">{{ t.accountId }}</td>
+      </tr>
+    </table>
+  </section>
+
+  <section *ngIf="tab==='transaction'">
+    <h2>Enregistrer une transaction</h2>
+    <div class="form">
+      <select [(ngModel)]="tx.accountId">
+        <option value="" disabled>Choisir un compte</option>
+        <option *ngFor="let a of accounts" [value]="a.id">{{ a.customerReference }} – {{ a.balance }} {{ a.currency }}</option>
+      </select>
+      <select [(ngModel)]="tx.type"><option>DEBIT</option><option>CREDIT</option></select>
+      <input type="number" placeholder="Montant" [(ngModel)]="tx.amount">
+      <input placeholder="Devise" maxlength="3" [(ngModel)]="tx.currency">
+      <input placeholder="Catégorie marchand" [(ngModel)]="tx.merchantCategory">
+      <input placeholder="Pays" maxlength="2" [(ngModel)]="tx.country">
+      <button (click)="submitTransaction()">Valider</button>
+    </div>
+    <p class="hint">Règles : montant &gt; 0 et ≤ plafond (config-service), compte actif, même devise, solde suffisant.</p>
+  </section>
+
+  <section *ngIf="tab==='transfer'">
+    <h2>Virement entre comptes</h2>
+    <div class="form">
+      <select [(ngModel)]="tr.fromAccountId">
+        <option value="" disabled>Compte source</option>
+        <option *ngFor="let a of accounts" [value]="a.id">{{ a.customerReference }} – {{ a.balance }} {{ a.currency }}</option>
+      </select>
+      <select [(ngModel)]="tr.toAccountId">
+        <option value="" disabled>Compte destination</option>
+        <option *ngFor="let a of accounts" [value]="a.id">{{ a.customerReference }} – {{ a.currency }}</option>
+      </select>
+      <input type="number" placeholder="Montant" [(ngModel)]="tr.amount">
+      <input placeholder="Devise" maxlength="3" [(ngModel)]="tr.currency">
+      <button (click)="submitTransfer()">Virer</button>
+    </div>
+  </section>
+
+  <section *ngIf="tab==='chat'">
+    <h2>Assistant bancaire (Spring AI + MCP)</h2>
+    <div class="chat">
+      <div *ngFor="let m of chatLog" class="bubble" [class.me]="m.from==='me'">{{ m.text }}</div>
+      <div class="bubble" *ngIf="chatBusy">…</div>
+    </div>
+    <div class="row">
+      <input class="grow" placeholder="Ex : Quel est le solde de CUST-001 ?" [(ngModel)]="chatInput" (keyup.enter)="send()">
+      <button (click)="send()" [disabled]="chatBusy">Envoyer</button>
+    </div>
+  </section>
+</main>
