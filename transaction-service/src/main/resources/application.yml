@@ -1,0 +1,87 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: transaction-service
+  config:
+    import: optional:configserver:${CONFIG_URL:http://localhost:8888}
+  datasource:
+    url: jdbc:h2:mem:transactiondb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  graphql:
+    path: /transaction-graphql
+    graphiql:
+      enabled: true
+      path: /transaction-graphiql
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 3000
+  ai:
+    mcp:
+      server:
+        name: transaction-mcp-server
+        version: 1.0.0
+        type: SYNC
+
+# valeur de secours si le config-service est indisponible (surchargée par le config-service : 1000)
+bank:
+  transaction:
+    max-amount: 1000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:false}
+
+# ---------------- Resilience4J ----------------
+resilience4j:
+  circuitbreaker:
+    instances:
+      accountService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+        # seules les pannes techniques comptent ; les 4xx métier sont ignorées
+        record-exceptions:
+          - feign.RetryableException
+          - feign.FeignException$InternalServerError
+          - feign.FeignException$BadGateway
+          - feign.FeignException$ServiceUnavailable
+          - feign.FeignException$GatewayTimeout
+  retry:
+    instances:
+      accountService:
+        max-attempts: 3
+        wait-duration: 300ms
+        retry-exceptions:
+          - feign.RetryableException
+          - feign.FeignException$BadGateway
+          - feign.FeignException$ServiceUnavailable
+          - feign.FeignException$GatewayTimeout
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
